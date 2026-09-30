@@ -1,12 +1,14 @@
 # Lab 03 - Shared Memory (Reusing ipmmem0) + MBOX Notification, and Feeling a Real Race Condition
 
+**[한국어 버전](README_kr.md)**
+
 ## 1. Purpose of this lab
 
 Lab 02 used MBOX purely as a "doorbell" that carried no payload at all. Lab 03 takes one step further:
 
 - procpu and appcpu actually **write and read a real struct directly in shared SRAM** (using MBOX + raw pointers, with no framework like `ipc_service.h`)
 - Along the way, you observe on real hardware **a race condition that is unavoidable once you build IPC by hand, with no framework underneath**
-- You'll see that `atomic_t` fixes "never losing the notification count", but "a single shared-memory slot that keeps getting overwritten with the latest value" still fundamentally loses intermediate values, regardless of the notification count being correct → this is exactly why a real message-queue framework such as `IPC Service` (icmsg/rpmsg) in Lab 04/05 is needed
+- You'll see that `atomic_t` fixes "never losing the notification count", but "a single shared-memory slot that keeps getting overwritten with the latest value" still fundamentally loses intermediate values, regardless of the notification count being correct → this is exactly why a real message-queue framework such as `IPC Service` (icmsg) in Lab 04 is needed
 
 There is no button and no new wiring in this lab. It reuses the exact same two LEDs as Labs 01/02 (PROCPU=GPIO2, APPCPU=GPIO42) - almost everything you need to observe shows up in **procpu's serial log alone** (appcpu still has no UART console support - see the `01_HELLO_DUALCORE_LAB` doc for why).
 
@@ -51,19 +53,27 @@ We also confirmed that the `mbox0` driver internally splits this same 1KB into t
 
 ## 3. What you need / wiring
 
-- An ESP32-S3-DevKitC-1 board and one USB cable
-- **No extra wiring** - uses the exact same two onboard LEDs as Labs 01/02:
-  - PROCPU heartbeat LED: GPIO2 (`&gpio0`)
-  - APPCPU heartbeat LED: GPIO42 (`&gpio1`, local index 42-32=10)
-- (If you need to wire the LEDs externally, follow the wiring instructions in the Lab 01 doc - this lab does not repeat that explanation)
+| Part | Qty |
+| --- | --- |
+| ESP32-S3-DevKitC-1 | 1 |
+| LED | 2 (reused from Labs 01/02) |
+| Resistor (220-330 ohm) | 2 |
+| Breadboard + jumper wires | a few |
+| USB cable | 1 |
+
+| Signal | GPIO | Purpose |
+| --- | --- | --- |
+| PROCPU heartbeat LED | **GPIO2** (`&gpio0`) | Same as Labs 01/02 |
+| APPCPU heartbeat LED | **GPIO42** (`&gpio1`, local index 42-32=10) | Same as Labs 01/02 |
+
+This lab uses no button at all, and reuses the exact same LED wiring already connected in Lab 01, so **there is no extra wiring**. (If you're wiring the LEDs for the first time, see the Lab 01 doc: connect a 220-330 ohm resistor in series from GPIO2/GPIO42 to each LED's anode, and the cathode to GND.)
 
 ## 4. Directory structure
 
 ```
 03_SHM_RACE_LAB/
-├── doc/
-│   ├── 03_SHM_RACE_LAB_KR.md
-│   └── 03_SHM_RACE_LAB_EN.md           (this document)
+├── README.md                           (this document)
+├── README_kr.md                        (Korean version)
 └── lab/
     ├── CMakeLists.txt                  (procpu app)
     ├── prj.conf                        (procpu Kconfig)
@@ -157,7 +167,7 @@ You'll see roughly this pattern in procpu's serial log (exact numbers vary with 
 
 `drained_count=3` together with `last_seen_seq=7` means appcpu's third processed item did not actually see the (already-gone) values 4, 5, or 6 - it read whatever the latest value, 7, happened to be at that moment. **The notification was correctly counted as the 3rd one processed, but the actual data from 4 and 5 and 6 is gone for good.**
 
-This is the fundamental limitation you inevitably run into when you build IPC by hand with nothing but shared memory and a doorbell, with no framework underneath. `atomic_t` correctly preserves "how many notifications arrived", but it cannot preserve "what data each notification carried" - because there's only one slot. Solving that requires an actual message queue (each message kept in its own slot, e.g. a ring buffer) - which is exactly the problem that `IPC Service` (the `icmsg`/`rpmsg` backends covered in Lab 04/05) already solves for you at the framework level.
+This is the fundamental limitation you inevitably run into when you build IPC by hand with nothing but shared memory and a doorbell, with no framework underneath. `atomic_t` correctly preserves "how many notifications arrived", but it cannot preserve "what data each notification carried" - because there's only one slot. Solving that requires an actual message queue (each message kept in its own slot, e.g. a ring buffer) - which is exactly the problem that `IPC Service` (the `icmsg` backend covered in Lab 04) already solves for you at the framework level.
 
 ## 8. Checklist for correct behavior
 

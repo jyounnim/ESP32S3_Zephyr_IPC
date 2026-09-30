@@ -1,5 +1,7 @@
 # Lab 01 Troubleshooting - APPCPU LED never lights up
 
+**[한국어 버전](TROUBLESHOOTING_kr.md)**
+
 ## Symptom
 
 The PROCPU LED (and its log output) worked correctly from the start. The APPCPU LED never lit up at all. Tried multiple GPIO pins (GPIO42 -> GPIO18 -> GPIO2), different blink periods, and physically swapping the LED/resistor pair between the two circuits - always the same result: **only the pin driven by PROCPU ever toggles; whichever pin APPCPU drives never toggles, regardless of which pin that is.**
@@ -42,6 +44,8 @@ CONFIG_ESP32_SOFT_IPM=y
 };
 ```
 
-## Open question for later labs
+## Follow-up (resolved in Lab 02)
 
-- Starting with Lab 02, this series moves to the MBOX (`mbox.h`) API. **Whether this same IPM requirement still applies once MBOX is in use - or whether enabling MBOX itself has the same effect of releasing APPCPU - has not been confirmed yet.** This needs to be re-checked at the start of Lab 02; it's possible both IPM and MBOX will need to be enabled together.
+Confirmed on real hardware in Lab 02: **`&ipm0` and `&mbox0` are two different driver bindings for the exact same physical hardware** (same register block, same shared memory, same interrupt sources), and **`&mbox0` alone (with `&ipm0` left disabled) is enough to release APPCPU from reset**. So what actually matters isn't the specific `ipm0` driver - it's this shared hardware being enabled at all.
+
+Based on this, this series' policy is now: a dual-core/IPC lab enables whichever of `ipm0`/`mbox0` matches the API it actually teaches - not both (see `02_MBOX_DOORBELL_LAB`'s doc for details).

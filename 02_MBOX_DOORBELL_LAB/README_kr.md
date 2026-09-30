@@ -1,5 +1,7 @@
 # Lab 02 - MBOX 도어벨 (신호 전용, 양방향)
 
+**[English version](README.md)**
+
 ## 1. 이 랩의 목적
 
 이 시리즈에서 두 코어가 처음으로 실제 통신을 시작하는 랩입니다. Zephyr의 **MBOX API**(`mbox.h`)를 데이터 없이 순수 "초인종(도어벨)" 신호로만 사용합니다 - `mbox_send_dt()`에 실제 데이터 대신 `NULL`을 넘겨서, "눌렀다"는 사실 자체만 상대 코어에 전달합니다.
@@ -39,9 +41,8 @@ Lab 01에서 확인한 사실: **PROCPU/APPCPU 양쪽에서 `&ipm0`가 켜져 �
 
 ```
 02_MBOX_DOORBELL_LAB/
-├── doc/
-│   ├── 02_MBOX_DOORBELL_LAB_KR.md   (이 문서)
-│   └── 02_MBOX_DOORBELL_LAB_EN.md
+├── README.md                      (영문 버전)
+├── README_kr.md                   (이 문서)
 └── lab/
     ├── CMakeLists.txt        # core0 (procpu) 앱
     ├── prj.conf              # core0 설정

@@ -1,5 +1,7 @@
 # Lab 04 - IPC Service (icmsg backend): Rebuilding Lab 03 on a Standard Framework
 
+**[한국어 버전](README_kr.md)**
+
 ## 1. Purpose of this lab
 
 Lab 03 implemented IPC using nothing but raw MBOX and a hand-rolled shared struct, and directly confirmed a fundamental limitation as a result: "notification counts can be preserved, but a single-slot shared memory region still loses intermediate data".
@@ -66,20 +68,31 @@ A few notes on the design choices:
 - **`dcache-alignment = <0>`**: this is a required property per the official binding docs, so it must be set to something. We set it to `0` (meaning "this region is not cached") because Labs 02/03 already read and wrote the adjacent block (`ipmmem0`) via plain `volatile` pointers with no cache flush/invalidate at all, and it worked correctly on real hardware - implying `shm0`, in the same SRAM range, is not cached either.
 - **`mboxes = <&mbox0 0>, <&mbox0 0>;`**: as already established in Labs 02/03, ESP32's MBOX hardware only has one channel per direction, so both tx and rx point at channel 0. icmsg internally uses the exact same `mbox_send_dt()`/`mbox_register_callback_dt()` pattern we used directly in Labs 02/03, so this carries over unchanged.
 - **Only `&mbox0` enabled, `&ipm0` stays disabled**: following this series' existing policy.
-- icmsg is **single-endpoint only** (per `CONFIG_IPC_SERVICE_BACKEND_ICMSG`'s Kconfig description: "single endpoint implementation based on circular packet buffer") - so this lab registers exactly one endpoint per instance. Multiple endpoints would require a different backend, such as Lab 05's rpmsg or `icmsg_me`.
+- icmsg is **single-endpoint only** (per `CONFIG_IPC_SERVICE_BACKEND_ICMSG`'s Kconfig description: "single endpoint implementation based on circular packet buffer") - so this lab registers exactly one endpoint per instance. Multiple endpoints would require a different backend, such as `icmsg_me` or `rpmsg` (neither is covered in this series).
 
 ## 4. What you need / wiring
 
-- An ESP32-S3-DevKitC-1 board and one USB cable
-- No extra wiring (uses the same two LEDs as Labs 01/02/03)
+| Part | Qty |
+| --- | --- |
+| ESP32-S3-DevKitC-1 | 1 |
+| LED | 2 (reused from Labs 01-03) |
+| Resistor (220-330 ohm) | 2 |
+| Breadboard + jumper wires | a few |
+| USB cable | 1 |
+
+| Signal | GPIO | Purpose |
+| --- | --- | --- |
+| PROCPU heartbeat LED | **GPIO2** (`&gpio0`) | Same as Labs 01-03 |
+| APPCPU heartbeat LED | **GPIO42** (`&gpio1`, local index 42-32=10) | Same as Labs 01-03 |
+
+This lab also uses no button, and reuses the exact same LED wiring already connected in Lab 01, so **there is no extra wiring**. (If wiring for the first time, see the Lab 01 doc: a 220-330 ohm resistor in series from GPIO2/GPIO42 to each LED's anode, cathode to GND.)
 
 ## 5. Directory structure
 
 ```
 04_IPC_SERVICE_ICMSG_LAB/
-├── doc/
-│   ├── 04_IPC_SERVICE_ICMSG_LAB_KR.md
-│   └── 04_IPC_SERVICE_ICMSG_LAB_EN.md   (this document)
+├── README.md                            (this document)
+├── README_kr.md                         (Korean version)
 └── lab/
     ├── CMakeLists.txt
     ├── prj.conf
@@ -177,4 +190,4 @@ This confirms, on real hardware, that reusing `shm0` (the 16KB block with no pri
 
 ## What's next
 
-Lab 05 swaps the same request-response structure from the icmsg backend to the `rpmsg` backend (OpenAMP-based, the standard RPMsg protocol), comparing latency and code complexity between the two.
+This series wraps up its `IPC Service` coverage with icmsg as the representative backend (the originally-planned `rpmsg`/OpenAMP backend lab was dropped once we confirmed ESP32-S3 isn't on that Zephyr sample's list of officially supported boards, so this board combination doesn't use it). The lab that follows, Lab 05, doesn't continue the icmsg thread - instead it goes to the opposite end of the spectrum: the legacy `IPM` API put to work in a real sensor-plus-display application.

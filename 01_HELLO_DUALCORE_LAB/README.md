@@ -1,5 +1,7 @@
 # Lab 01 - Hello Dual-Core (ESP32-S3 AMP scaffolding, no IPC)
 
+**[한국어 버전](README_kr.md)**
+
 ## 1. Purpose of this lab
 
 This is the first lab in the ESP32-S3 Zephyr Dual-Core IPC series. This lab has **no real IPC (no data exchange) at all** - the only goal is to learn how to build and flash **two completely independent Zephyr images** onto ESP32-S3's two cores (PROCPU/APPCPU) at the same time, and confirm that both are actually alive.
@@ -48,11 +50,10 @@ In other words, even a pure "hello world" lab like this one with zero actual IPC
 
 ```
 01_HELLO_DUALCORE_LAB/
-├── doc/
-│   ├── 01_HELLO_DUALCORE_LAB_KR.md
-│   ├── 01_HELLO_DUALCORE_LAB_EN.md              (this document)
-│   ├── 01_HELLO_DUALCORE_LAB_TROUBLESHOOTING_KR.md
-│   └── 01_HELLO_DUALCORE_LAB_TROUBLESHOOTING_EN.md
+├── README.md                      (this document)
+├── README_kr.md                   (Korean version)
+├── TROUBLESHOOTING.md             (troubleshooting, English)
+├── TROUBLESHOOTING_kr.md          (troubleshooting, Korean)
 └── lab/
     ├── CMakeLists.txt        # core0 (procpu) app
     ├── prj.conf              # core0 config

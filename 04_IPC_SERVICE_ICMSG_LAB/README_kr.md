@@ -1,5 +1,7 @@
 # Lab 04 - IPC Service (icmsg backend): 표준 프레임워크로 Lab 03을 다시 만들기
 
+**[English version](README.md)**
+
 ## 1. 이 랩의 목적
 
 Lab 03에서는 MBOX + 우리가 직접 만든 공유 구조체만으로 IPC를 구현했고, 그 결과 "알림 개수는 지킬 수 있어도 슬롯 하나짜리 공유 메모리로는 중간 데이터가 손실된다"는 근본적인 한계를 직접 확인했습니다.
@@ -66,19 +68,31 @@ appcpu 오버레이는 `tx-region`/`rx-region`을 정확히 반대로 지정합�
 - **`dcache-alignment = <0>`**: 이 값은 공식 binding 문서에 필수(required) 항목으로 나와 있어서 반드시 지정해야 합니다. `0`으로 둔 이유는 "이 메모리 영역이 캐시되지 않는다"는 뜻인데, Lab 02/03에서 바로 이 옆 블록(`ipmmem0`)을 캐시 관리(flush/invalidate) 없이 `volatile` 포인터로만 읽고 써도 실기에서 정상 동작했으므로, 같은 SRAM 영역에 속한 `shm0`도 캐시되지 않는다고 추론했습니다.
 - **`mboxes = <&mbox0 0>, <&mbox0 0>;`**: Lab 02/03에서 이미 확인했듯, ESP32 MBOX 하드웨어는 방향당 채널이 1개뿐이라 tx/rx 모두 채널 0을 가리킵니다 - icmsg도 내부적으로는 우리가 Lab 02/03에서 직접 했던 것과 똑같은 `mbox_send_dt()`/`mbox_register_callback_dt()` 패턴을 쓰므로 그대로 적용됩니다.
 - **`&mbox0`만 활성화, `&ipm0`는 비활성화**: 이 시리즈의 기존 정책을 그대로 따릅니다.
-- icmsg는 **단일 엔드포인트 전용**입니다(`CONFIG_IPC_SERVICE_BACKEND_ICMSG`의 Kconfig 설명: "single endpoint implementation based on circular packet buffer") - 그래서 이번 랩은 인스턴스당 엔드포인트를 딱 하나만 등록합니다. 여러 엔드포인트가 필요하면 Lab 05의 rpmsg나 `icmsg_me` 같은 다른 backend가 필요합니다.
+- icmsg는 **단일 엔드포인트 전용**입니다(`CONFIG_IPC_SERVICE_BACKEND_ICMSG`의 Kconfig 설명: "single endpoint implementation based on circular packet buffer") - 그래서 이번 랩은 인스턴스당 엔드포인트를 딱 하나만 등록합니다. 여러 엔드포인트가 필요하면 `icmsg_me`나 `rpmsg` 같은 다른 backend가 필요합니다 (둘 다 이 시리즈에서는 다루지 않습니다).
 
 ## 4. 준비물 / 배선
 
-- ESP32-S3-DevKitC-1 보드, USB 케이블 1개
-- 추가 배선 없음 (Lab 01/02/03과 동일한 LED 2개만 사용)
+| 부품 | 수량 |
+| --- | --- |
+| ESP32-S3-DevKitC-1 | 1 |
+| LED | 2개 (Lab 01~03과 동일하게 재사용) |
+| 저항 (220~330Ω) | 2개 |
+| 브레드보드 + 점퍼선 | 약간 |
+| USB 케이블 | 1개 |
+
+| 신호 | GPIO | 용도 |
+| --- | --- | --- |
+| PROCPU 하트비트 LED | **GPIO2** (`&gpio0`) | Lab 01~03과 동일 |
+| APPCPU 하트비트 LED | **GPIO42** (`&gpio1`, 로컬 인덱스 42-32=10) | Lab 01~03과 동일 |
+
+이 랩도 버튼을 쓰지 않고, LED 배선도 Lab 01에서 연결한 것을 그대로 재사용하므로 **추가 배선이 전혀 없습니다.** (처음 배선하는 경우 Lab 01 문서를 참고하세요 - GPIO2/GPIO42 각각에 220~330Ω 저항을 직렬로 연결해 LED 애노드에, LED 캐소드는 GND로 연결합니다.)
 
 ## 5. 디렉터리 구조
 
 ```
 04_IPC_SERVICE_ICMSG_LAB/
-├── doc/
-│   └── 04_IPC_SERVICE_ICMSG_LAB_KR.md   (이 문서)
+├── README.md                            (영문 버전)
+├── README_kr.md                         (이 문서)
 └── lab/
     ├── CMakeLists.txt
     ├── prj.conf
@@ -176,4 +190,4 @@ Lab 03과 정확히 대비되는 결과가 그대로 나타납니다:
 
 ## 다음 단계
 
-같은 request-response 구조를 icmsg 대신 `rpmsg` backend(OpenAMP 기반, 정식 RPMsg 프로토콜)로 교체해서 지연시간과 코드 복잡도를 비교하는 것이 Lab 05의 내용입니다.
+이 시리즈에서는 icmsg가 `IPC Service` 프레임워크를 대표하는 랩으로 마무리됩니다 (원래 계획했던 `rpmsg`/OpenAMP backend 랩은 ESP32-S3가 해당 Zephyr 샘플의 공식 지원 보드 목록에 없다는 것이 확인되어, 이 보드 조합에서는 채택하지 않기로 했습니다). 이어지는 Lab 05는 icmsg의 뒤를 잇는 대신, 스펙트럼의 반대쪽 끝 - 레거시 `IPM` API가 실제 센서+디스플레이 애플리케이션에 쓰이는 모습 - 을 다룹니다.

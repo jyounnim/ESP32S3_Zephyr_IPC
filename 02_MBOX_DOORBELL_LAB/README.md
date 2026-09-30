@@ -1,5 +1,7 @@
 # Lab 02 - MBOX Doorbell (signal-only, bidirectional)
 
+**[한국어 버전](README_kr.md)**
+
 ## 1. Purpose of this lab
 
 This is the first lab in the series where the two cores actually talk to each other. It uses Zephyr's **MBOX API** (`mbox.h`) purely as a "doorbell" - a signal with no data payload at all. `mbox_send_dt()` is called with `NULL` instead of real data, so only the fact that "it rang" ever crosses over, nothing more.
@@ -39,9 +41,8 @@ This lab reuses Lab 01's LED wiring as-is, and the button is already on the boar
 
 ```
 02_MBOX_DOORBELL_LAB/
-├── doc/
-│   ├── 02_MBOX_DOORBELL_LAB_KR.md
-│   └── 02_MBOX_DOORBELL_LAB_EN.md   (this document)
+├── README.md                      (this document)
+├── README_kr.md                   (Korean version)
 └── lab/
     ├── CMakeLists.txt        # core0 (procpu) app
     ├── prj.conf              # core0 config

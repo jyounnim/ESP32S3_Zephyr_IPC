@@ -1,5 +1,7 @@
 # Lab 01 - Hello Dual-Core (ESP32-S3 AMP 스캐폴딩, IPC 없음)
 
+**[English version](README.md)**
+
 ## 1. 이 랩의 목적
 
 ESP32-S3 Zephyr Dual-Core IPC 시리즈의 첫 번째 랩입니다. 이 랩에는 **실제 IPC(데이터 주고받기)가 전혀 없습니다** - 목적은 딱 하나, ESP32-S3의 두 코어(PROCPU/APPCPU) 위에서 **완전히 독립된 두 개의 Zephyr 이미지**를 동시에 빌드/플래시하고, 둘 다 정상적으로 살아 있는지 확인하는 방법을 익히는 것입니다.
@@ -48,11 +50,10 @@ ESP32-S3용 Zephyr 보드 포트는 **AMP(Asymmetric Multiprocessing)만 지원*
 
 ```
 01_HELLO_DUALCORE_LAB/
-├── doc/
-│   ├── 01_HELLO_DUALCORE_LAB_KR.md              (이 문서)
-│   ├── 01_HELLO_DUALCORE_LAB_EN.md
-│   ├── 01_HELLO_DUALCORE_LAB_TROUBLESHOOTING_KR.md
-│   └── 01_HELLO_DUALCORE_LAB_TROUBLESHOOTING_EN.md
+├── README.md                      (영문 버전)
+├── README_kr.md                   (이 문서)
+├── TROUBLESHOOTING.md             (트러블슈팅, 영문)
+├── TROUBLESHOOTING_kr.md          (트러블슈팅, 국문)
 └── lab/
     ├── CMakeLists.txt        # core0 (procpu) 앱
     ├── prj.conf              # core0 설정
